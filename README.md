@@ -116,7 +116,7 @@ and *THIS* is how I install it
     sudo apt-get install tailscale
     sudo tailscale up
     sudo apt update && sudo apt install -y git gcc make cmake ffmpeg libjpeg-dev libavcodec-dev libavformat-dev libswscale-dev
-    git clone https://github.com/ccrisan/streameye.git
+    git clone https://github.com/nasbits/streameye.git
     cd streameye
     make
     sudo make install
