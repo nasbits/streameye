@@ -10,7 +10,7 @@ In the absence of a separator, *streamEye* will autodetect all JPEG frames.
 *streamEye* was tested on various Linux machines, but may work just fine on other platforms.
 Assuming your machine has `git`, `gcc` and `make` installed, just type the following commands to compile and install:
 
-    git clone https://github.com/ccrisan/streameye.git
+    git clone https://github.com/nasbits/streameye.git
     cd streameye
     make
     sudo make install
@@ -97,3 +97,72 @@ This script continuously captures JPEGs from a Raspberry PI's CSI camera and wri
 Why not `raspivid` or `raspistill`? Well, at the time of writing `raspivid` doesn't output JPEGs and `raspistill` only works in *stills* mode.
 
 Why Python and not C? Because most of the stuff is done by the GPU, so the insignificant performance gain would not make it worth writing C code. And of course because [picamera](https://picamera.readthedocs.org/) is an amazing library.
+
+
+
+
+
+I personally use *this* for my usage of streameye, that all have their feeds used on my central motioneye server.
+
+    
+    sudo ffmpeg -f v4l2 -input_format yuyv422 -video_size 720x640 -framerate 15 -i /dev/video0 -c:v mjpeg -q:v 5 -vf "vflip,hflip" -f mjpeg - | streameye
+
+and *THIS* is how I install it
+
+    sudo apt-get install apt-transport-https
+    curl -fsSL https://pkgs.tailscale.com/stable/raspbian/bullseye.noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg > /dev/null
+    curl -fsSL https://pkgs.tailscale.com/stable/raspbian/bullseye.tailscale-keyring.list | sudo tee /etc/apt/sources.list.d/tailscale.list
+    sudo apt-get update
+    sudo apt-get install tailscale
+    sudo tailscale up
+    sudo apt update && sudo apt install -y git gcc make cmake ffmpeg libjpeg-dev libavcodec-dev libavformat-dev libswscale-dev
+    git clone https://github.com/ccrisan/streameye.git
+    cd streameye
+    make
+    sudo make install
+    sudo apt install bind9-host
+
+and I run *this* service for it to work properly, and this is how you can do the same.
+
+    sudo nano /usr/local/bin/startup_script.sh
+
+###startup_script.sh
+
+    #!/bin/bash
+
+    # Function to run the commands
+    run_commands() {
+    sudo tailscale up
+    sudo ffmpeg -f v4l2 -input_format yuyv422 -video_size 720x640 -framerate 15 -i /dev/video0 -c:v mjpeg -q:v 5 -vf "vflip,hflip" -f mjpeg - | streameye
+    }
+
+    # Run the commands
+    run_commands
+
+    # Schedule a reboot after 1 hour (3600 seconds)
+    sudo shutdown -r +3600
+
+and then run these commands, then youre done
+
+    sudo chmod +x /usr/local/bin/startup_script.sh
+    sudo nano /etc/systemd/system/run_commands.service
+##run_commands.service
+
+    [Unit]
+    Description=Run commands at startup and schedule reboot
+
+    [Service]
+    ExecStart=/usr/local/bin/startup_script.sh
+    Restart=always
+
+    [Install]
+    WantedBy=multi-user.target
+
+then run these
+
+    sudo systemctl enable run_commands.service
+    sudo systemctl start run_commands.service
+
+    sudo reboot
+
+and now youre done! thanks for coming here, have a good one!
