@@ -102,7 +102,7 @@ Why Python and not C? Because most of the stuff is done by the GPU, so the insig
 
 
 
-I personally use *this* for my usage of streameye, that all have their feeds used on my central motioneye server.
+I personally use *this* for my usage of streameye, that all have their feeds used on my central motioneye server, and uses a reverse proxy with tailscale.
 
     
     sudo ffmpeg -f v4l2 -input_format yuyv422 -video_size 720x640 -framerate 15 -i /dev/video0 -c:v mjpeg -q:v 5 -vf "vflip,hflip" -f mjpeg - | streameye
