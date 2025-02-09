@@ -126,7 +126,7 @@ and I run *this* service for it to work properly, and this is how you can do the
 
     sudo nano /usr/local/bin/startup_script.sh
 
-###startup_script.sh
+startup_script.sh
 
     #!/bin/bash
 
@@ -146,7 +146,7 @@ and then run these commands, then youre done
 
     sudo chmod +x /usr/local/bin/startup_script.sh
     sudo nano /etc/systemd/system/run_commands.service
-##run_commands.service
+run_commands.service
 
     [Unit]
     Description=Run commands at startup and schedule reboot
